@@ -1,4 +1,5 @@
 import { v2 as cloudinary } from "cloudinary";
+import fs from "fs";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -13,17 +14,12 @@ const uploadOnCloudinary = async (localFilePath) => {
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
     });
-    console.log("file is uploaded");
-  } catch (error) {}
+    console.log("file is uploaded", response.url);
+    return response;
+  } catch (error) {
+    fs.unlinkSync(localFilePath); // remove the file from local saved temporary file as the upload operation failed.
+    return null;
+  }
 };
 
-const uploadResult = await cloudinary.uploader
-  .upload(
-    "https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg",
-    {
-      public_id: "shoes",
-    }
-  )
-  .catch((error) => {
-    console.log(error);
-  });
+export default uploadOnCloudinary;
